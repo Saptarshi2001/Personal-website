@@ -65,19 +65,20 @@
 </head>
 
 <body>
-    <h1 id="heading">Building a Shell from Scratch</h1>
+    <h1 id="heading"><u>Building a Shell from Scratch</u></h1>
 
     <div class="Cshell">
         <p>Hello and welcome readers!! So this is the first post on my blog. And To kick things off, let's see how we can build a basic implementation of a shell. 
             If you have ever wondered how a shell actually works, you can get to know it here.</p>
         
-        <h2 class="section-title">Reading the Lines</h2>
+        <h2 class="section-title"><u>Reading the Lines</u></h2>
         <div class="section-content">
             
             <p>First, we declare a buffer size (let's say 1024; it can be anything really but just big enough to hold the input), a variable called <code>line</code> that points to the array, a variable called <code>position</code> that indicates the current index, and an integer variable <code>c</code>.</p>
             <p>We then use <code>malloc</code> to dynamically allocate the array. We dynamically allocate it since we can't predefine a definite number of characters from the start.</p>
             <p>Next, we enter a loop and input characters through <code>c = getchar()</code>. If it's EOF or '\n', we end the loop, put <code>line[position]</code> in the array, end the loop, and return the pointer to the array. Otherwise, we store that character in the array and increase the position by 1. If the size of the array exceeds <code>buffsize</code>, we use <code>realloc</code> to reallocate the array.</p>
-            <pre><code>char *readline()
+            <pre><code>
+                char *readline()
                 {
                     int status;
                     char *line;
@@ -121,12 +122,13 @@
             </code></pre>
         </div>
         
-        <h2 class="section-title">Splitting the Line</h2>
+        <h2 class="section-title"><u>Splitting the Line</u></h2>
         <div class="section-content">
             <p>After reading the line, we pass the pointer to a function <code>splitline</code>. Here we declare a variable <code>buff_size</code> to be 64. We declare <code>ptrtokens</code> and <code>token</code> as a pointer and another as the pointer to pointer variable. Next, we dynamically allocate the <code>tokens</code> variable as an array where each element will be a variable.</p>
             <p>We then go through a loop where using the <code>strtok</code> function, we split the line array using delimiters, get the pointer that points to these split lines, and put it in the array of pointers. We increment <code>pos</code> by 1 and continue until <code>token != NULL</code>. We then return the pointer that points to the array of pointers, i.e., <code>tokens</code>.</p>
             <p>Before executing it, we create an array of built-ins for the commands that will be executed. We also create a function that stores the addresses of the functions of the commands we execute.</p>
-            <pre><code>char **splitline(char *line)
+            <pre><code>
+                char **splitline(char *line)
                 {
             
                     int buff_size = LSH_TOK_BUFSIZE;
@@ -165,11 +167,11 @@
         
         </div>
         
-        <h2 class="section-title">Executing Commands</h2>
+        <h2 class="section-title"><u>Executing Commands</u></h2>
         <div class="section-content">
             <p>Now, let's discuss the <code>execute</code> function:</p>
             <pre><code>
-                int sh_execute(char **splitline)
+    int sh_execute(char **splitline)
     {
         if (splitline[0] == NULL)
         {
@@ -185,12 +187,24 @@
         return sh_launch(splitline);
     }
             </code></pre>
+    <p>So as you can see over here,what the execute function does is go over traverse the builtins that we have , try seeing whether it matches with args[0] and if it does 
+        call the function.If however it does not find any builtins , it executes sh_launch.</p>
+
+
+    <p>Now there's a little bit explaining needed.A shell is itself a process.When a shell executes an external program, it creates a fork of that process , the new process runs
+        while the shell being a process as well is present in the background using wait() to again start executing after the child has stopped executing.Now commands like cd,cat 
+        are being built right into the shell.Therefore when we run cd,we want the shell itself to change its directory and not a child process.Therefore you get either return (*builtins_fun[i])(splitline) which executes the builtin command 
+        or return sh_launch(splitline) which creates a completely new process.
+
+    </p>
         </div>
         
-        <h2 class="section-title">Changing Directory</h2>
+    
+        <h2 class="section-title"><u>Creating the directory</u></h2>
         <div class="section-content">
             <p>In the <code>sh_cd</code> function, we first check whether there's an argument given with the <code>cd</code> command. If not, we simply output the current directory the person is in. If there's an error, we give an error message and end the program. If we get a '..', we step back to the previous directory. Otherwise, we change directories as per the arguments. At all these times, we use the <code>chdir</code> function where <code>var</code> is the name of the directory variable and <code>sizeof(MAX_PATH)</code> is the size of the variable.</p>
-            <pre><code>int sh_cd(char **args)
+            <pre><code>
+                int sh_cd(char **args)
                 {
                     char* store;
                     if (strcmp(args[0],"cd")==0 && args[1]==NULL)
@@ -224,10 +238,11 @@
         
         </div>
         
-        <h2 class="section-title">Making a Directory</h2>
+        <h2 class="section-title"><u>Making a Directory</u></h2>
         <div class="section-content">
             <p>Next up, we go to <code>sh_mkdir</code>. This function helps us to create a directory. If there are no arguments, it gives an error. If the directory already exists or the path is not found, it throws an error. Otherwise, it uses the <code>CreateDirectory</code> function, which takes the argument and <code>NULL</code> to create the directory.</p>
-      <pre><code> int sh_mkdir(char **args)
+      <pre><code> 
+    int sh_mkdir(char **args)
     {
     int result;
     result=CreateDirectory(args[1],NULL);
@@ -258,12 +273,12 @@
 
         </div>
         
-        <h2 class="section-title">Help, CLS, and Exit</h2>
+        <h2 class="section-title"><u>Help, CLS, and Exit</u></h2>
         <div class="section-content">
             <p>For getting a list of all the commands, we iterate over all the built-ins and print them. For <code>exit</code> and <code>cls</code>, there's not much to explain.</p>
        <pre><code>
 
-        int sh_help()
+    int sh_help()
     {
         printf("\n");
         printf("HERE ARE THE COMMANDS \n");
@@ -294,10 +309,11 @@
        
         </div>
         
-        <h2 class="section-title">Changing the Color</h2>
+        <h2 class="section-title"><u>Changing the Color</u></h2>
         <div class="section-content">
             <p>This one is my favorite. We first print out the characters and numbers present. We then take one input for the background color and one for the foreground color. We join both of them with <code>snprintf</code> and use the <code>system</code> command. Let's say we use 1 as the background and E as the foreground, and we get the desired color scheme.</p>
-        <pre><code>int sh_color()
+        <pre><code>
+            int sh_color()
             {
                 char col;
                 char backcol;
@@ -326,11 +342,11 @@
             }</code></pre>
         </div>
         
-        <h2 class="section-title">Extracting Contents from a File</h2>
+        <h2 class="section-title"><u>Extracting Contents from a File</u></h2>
         <div class="section-content">
             <p>Lastly, we see how the <code>cat</code> command can be used to extract contents from a file into the console. As of now, this command only works on text files, but I will add functionality for other types of files as well. If there's no <code>cat</code> in <code>args[0]</code> or no file given in <code>args[1]</code>, it's an error. Otherwise, we take <code>args[1]</code>, use the <code>fopen</code> function in C, and pass the file pointer to <code>fgets</code>. What <code>fgets</code> does in this loop is read the text line from the console, which we print out until it reaches <code>NULL</code>.</p>
         <pre><code>
-            int sh_cat(char **args)
+    int sh_cat(char **args)
     {
        char *err="cat";
        char *contains=".txt";
@@ -364,8 +380,34 @@
     }
         </code></pre>
         </div>
+    <h2 class="section-title"><u>Now reading all of these</u></h2>
+    <div class="section-content">
+    <p>Now putting readline,splitline and execute into a single function we get:-</p>
+        <pre><code>
+    void read_all()
+    {
+        char *line;
+        char **split;
+        int status;
+        printf("Welcome to the holy command line \n");
+
+        do
+        {
+            printf(">>");
+            line = readline();
+            split = splitline(line);
+            status= sh_execute(split);
+        } while (status);
+
+        free(line);
+        free(split);
+    }
+        </code></pre>
+
+
+    </div>
         
-        <h2 class="section-title">Putting it all together</h2>
+        <h2 class="section-title"><u>Putting it all together </u></h2>
         <div class="section-content">
             <pre><code>
             #define LSH_RL_BUFSIZE 1024
