@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Saptarshi Dutta's Blog</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: rgb(229, 243, 229);
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+        }
+
+        h1, h2, h4 {
+            color: rgb(26, 22, 22);
+            font-family: Verdana, sans-serif;
+            margin: 10px 0;
+            padding: 10px;
+        }
+
+        h1 {
+            font-size: 30px;
+        }
+
+        h2 {
+            font-size: 25px;
+        }
+
+        h4 {
+            font-size: 20px;
+        }
+
+        p {
+            margin: 10px 0;
+            padding: 10px;
+        }
+
+        .section-title {
+            margin-top: 40px;
+        }
+
+        .section-content {
+            margin-bottom: 20px;
+        }
+
+        pre {
+            background-color: #f4f4f4;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            overflow-x: auto;
+            margin: 20px 0;
+        }
+
+        code {
+            font-family: "Courier New", Courier, monospace;
+            font-size: 16px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1 id="heading">Understanding HTTP</h1>
+
+    <div class="Http">
+        <p>Hi!! In this post, we will discuss the intricacies of HTTP and how it works under the hood. In the end, we will build a basic implementation of an HTTP server. You can read more about the HTTP protocol in <a href="https://datatracker.ietf.org/doc/html/rfc9110">RFC 9110.</a></p>
+        
+        <h2 class="section-title">The TCP</h2>
+        <div class="section-content">
+            <p>Before we build our HTTP server, we need to build a TCP server. After all, HTTP is built on top of TCP.</p>
+            <pre><code>class TcpServer:
+                host='127.0.0.1'
+                port=80
+                conn=0
+                addr=0
+                allconn=[]
+                def start(self):
+                    sock=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+                    sock.bind((self.host,self.port))
+                    print("listening at ",sock.getsockname())
+                    sock.listen(1)
+                    try:
+                        while True:
+                            self.conn,self.addr=sock.accept()
+                            t=threading.Thread(target=self.handle_client,args=(self.conn,self.addr))
+                            t.start()
+                            self.allconn.append(t)	
+                    except socket.error:
+                        print("coudnt connect with the socket")
+                        SystemExit
+                    
+                    finally:
+                        if sock:
+                            sock.close()
+                        for t in self.allconn:
+                            t.join()
+                
+                def handle_client(self,conn,addr):
+
+                    data=conn.recv(1024)
+                        response=self.handle_request(data)
+                            conn.sendall(response)
+                            conn.close()
+                            
+                def handle_request(self,data):
+                    return data
+                    
+            </code></pre>
+            <p>In this server, first, we create a socket using the socket module in Python. <code>AF_INET</code> shows that the socket belongs to the IPv4 address family and <code>SOCK_STREAM</code> shows that the socket is a TCP socket type. It then binds itself to host 127.0.0.1 and port 80. The socket then listens for connections. When it connects, it gets the data as well as the address of the client. What it next does is create a separate thread from the main thread with <code>handle_client</code> and <code>conn, addr</code> as its arguments. The <code>handle_client</code> receives the data i.e., the request from the client, and passes it to <code>handle_request</code> which is implemented by HTTP (as I will explain later). Now this threading helps in two things:</p>
+            <ul>
+                <li>It helps process multiple connections.</li>
+                <li>It keeps the main thread free to further accept new connections.</li>
+            </ul>
+        </div>
+
+        <h2 class="section-title">Creating the HTTP Server</h2>
+        <div class="section-content">
+            <p>Now before we create the HTTP server, let us see what a typical request looks like:</p>
+            <pre><code>GET /
+Host: 
+Connection:
+User-Agent:</code></pre>
+
+		
+</code></pre>
+            <p>The request part i.e., the first line is made up of a:</p>
+            <ul>
+                <li><strong>Method</strong> - This tells the server what to do.</li>
+                <li><strong>URI</strong> - This stands for the resource that is being asked.</li>
+                <li><strong>HTTP version</strong> - This tells us the HTTP version the client supports.</li>
+            </ul>
+            <p>Now, what our class <code>HTTPServer</code> is doing is being a subclass of TCP server which ultimately also allows us to override the <code>handle_client</code> method. Before that, let's look at the response of an HTTP server:</p>
+            <pre><code>HTTP / 1.1 200 OK
+Server:
+Date:
+Content-Type:
+Content-Length:
+
+hello world</code></pre>
+            <p>The response goes like this:</p>
+            <ul>
+                <li>The response line</li>
+                <li>Response headers</li>
+                <li>A blank line</li>
+                <li>Response body</li>
+            </ul>
+            <pre><code>class HttpServer(TcpServer):
+	
+                cntlngth=''
+                headers={
+                    'Content-Type':'text/html ',
+                    'Server':'First server ',
+                    'Date'  :date.today(),
+                    'Content-length':''
+                    }
+                status_codes={
+                        200:'Ok \n',
+                        404:'Not found \n',
+                        501:'Not implemented \n'
+                    }
+                def __init__(self):
+                    self.uri=None
+                    self.method=None
+                    self.logger=logging.getLogger()
+                    self.logger.setLevel(logging.INFO)
+                    self.evnt_logger=logging.FileHandler("access.log",mode='w')
+                    self.evnt_logger.setFormatter(logging.Formatter('%(asctime)s  %(message)s'))
+            <p>That's why as you see above, we created the HTTP headers as well as the status codes. The 200 means that the operation was successful. The 404 means the resource was not found. The 505 means the particular operation can't be performed.</p>
+        </div>
+
+        <h2 class="section-title">Handling Requests</h2>
+        <div class="section-content">
+            <p>Now we come to the <code>handle_request</code> function. We use a <code>blank_line = b'\r\n'</code> for the body that we will use as a part of the message. Let's first parse the requests as shown in the parse function.</p>
+          <pre><code> def handle_request(self,data):
+		blank_line = b'\r\n'
+		res = self.parse(data)
+		cntlngth=len(res)
+		dict2={'Content-length':cntlngth}
+		self.headers.update(dict2)
+		if  res==b'':
+			head=self.get_headers(self.headers).encode()
+			stscds=self.get_codes(404)
+			body=b'<h1>Error 404 Page not found</h1>'
+			return b"".join([stscds,head,blank_line,body])
+
+		elif res==b'Not operatable':
+			head=self.get_headers(self.headers).encode()
+			stscds=self.get_codes(501)
+			body=b'<h1>Error 501 Not Implemented</h1>'
+			return b"".join([stscds,head,blank_line,body])
+
+		elif res==b'Deleted':
+			head=self.get_headers(self.headers).encode()
+			stscds=self.get_codes(200)
+			body=b'<h1>File Deleted</h1>'
+			return b"".join([stscds,head,blank_line,body])
+
+        
+		elif res==b'return head':
+			head=self.get_headers(self.headers)
+			stscds=self.get_codes(200)
+			return b"".join([stscds,head.encode(),blank_line])
+		
+		elif res==b'Form post done':
+			dict3={'Content-Type':'multipart/form-data'}
+			self.headers.update(dict3)
+			head=self.get_headers(self.headers).encode()
+			stscds=self.get_codes(200)
+			body=b'<h1>Happy hacking</h1>'
+			return b"".join([stscds,head,blank_line,body])
+
+            
+		else:
+			self.logger.addHandler(self.evnt_logger)
+			self.logger.info("Connected to"+" "+f"{self.addr}"+"and page "+" "+f"{self.uri}"+"requested")
+			head=self.get_headers(self.headers)
+			stscds=self.get_codes(200)
+			return b"".join([stscds,head.encode(),blank_line,res])</code></pre>
+
+            <h4 class="section-title">Parsing the Requests</h4>
+            <pre><code>
+                def parse(self,data):
+		lines=data.split(b"\r\n")
+		reqline=lines[0]
+		self.method=reqline.decode().split(' ')[0]
+		if self.method!='GET' and self.method!='DELETE' and self.method!='POST'  and self.method!='HEAD':
+			return b'Not operatable'
+		elif self.method=='DELETE':
+			self.handle_DELETE(reqline)
+			return b'Deleted'
+		elif self.method=='HEAD':
+			return b'return head'
+		elif self.method=='POST':
+			self.handle_POST(reqline)
+			return b'Form post done'
+	
+		response=self.handle_GET(reqline)
+		return response
+
+            </code></pre>
+            <p>In the parse section, we split the data by pulling a delimiter of '\r\n'. '\r' means carriage return and '\n' means newline, the split data is basically:</p>
+            <pre><code>GET index.html HTTP
+" " "
+" " "
+" " "</code></pre>
+
+            <p>From here we only use the first line.</p>
+            <p>Now if we have a request other than GET or DELETE or POST or HEAD, then it means that function can't be executed. So we return 'Not operatable'. We go back once again to the <code>handle_request</code> function.</p>
+            <p>Now since we get <code>res</code> as not operatable, we make the body 'Error 501 Not implemented'. First up, we need to put all our headers into the variable <code>head</code>.</p>
+            <pre><code>
+                def get_headers(self,headers):
+		header_lines = [f'{key}: {value}' for key, value in headers.items()]
+		return '\r\n'.join(header_lines)+'\r\n\r\n'
+	
+
+            </code></pre>
+            <p>Nothing much here to be honest except that you traverse the dictionary and create a key:value list. Now depending on the operation, we use the <code>get_codes</code> function by passing the code (in this case, it's 501 for Not operatable) as an argument. Now, in the <code>get_codes</code> function, we find out the value of 501 present in the dictionary <code>status_codes</code>. We then join it with HTTP/1.1, encode and return it.</p>
+            <p>We then join the headers, status codes, blank line, and body into a byte addressable string and send it to the response present in <code>handle_client</code> which sends it to the client. This header and status thing is present in every operation.</p>
+        <pre><code>
+            def get_codes(self,code):
+		msg=self.status_codes[code]
+		msgresponse='HTTP/1.1 %s %s \r \n'%(code,msg)
+		return msgresponse.encode()
+
+        </code></pre>
+        </div>
+
+        <h2 class="section-title">GET Operation</h2>
+        <div class="section-content">
+            <p>For the GET operation, what we did was find out the requested page by finding its start and end. We put it inside <code>uri</code>. Now we see whether it exists in the system and if it does, then we read that body and send it to <code>res</code> in the form of bytes.</p>
+        <pre><code>
+            def handle_GET(self,reqline):
+		body=b''
+		start=reqline.decode().find('/')+1
+		end=reqline.decode().find(' ',start)
+		self.uri=reqline[start:end]
+		if os.path.exists(self.uri) and not os.path.isdir(self.uri):
+			with open(self.uri,'rb')as r:
+				body=r.read()
+		return body
+
+        </code></pre>
+        </div>
+
+        <h2 class="section-title">DELETE Operation</h2>
+        <div class="section-content">
+            <p>For the DELETE operation, we do the same thing except that we remove the resource.</p>
+        <pre><code>
+            def handle_DELETE(self,reqline):
+		body=b''
+		start=reqline.decode().find('/')+1
+		end=reqline.decode().find(' ',start)
+		self.uri=reqline[start:end]
+		if os.path.exists(self.uri):
+			os.remove(self.uri)
+
+        </code></pre>
+        </div>
+
+        <h2 class="section-title">HEAD Method</h2>
+        <div class="section-content">
+            <p>For the HEAD method, since there's no body to be read, we didn't create any function. Instead, we packaged headers, status, and blank line into bytes and sent them to be sent to the <code>handle_request</code> function.</p>
+            Head method:-
+            -------------
+            For the head method,since there's no body to be read,we didnt created any
+            function. Instead we packaged headers,status and blank line into bytes and
+            sent them to be sent to the handle_request function.
+
+          <pre><code>
+            elif res==b'return head':
+			head=self.get_headers(self.headers)
+			stscds=self.get_codes(200)
+			return b"".join([stscds,head.encode(),blank_line])
+
+          </code></pre>  
+            
+        </div>
+        <h2 class="section-title">Putting it all together</h2>
+        <div class="section-content">
+            <pre><code>
+                import socket
+import threading
+import os
+import signal
+import mimetypes
+import logging
+import json
+import cgi
+from datetime import date
+class TcpServer:
+	host='127.0.0.1'
+	port=80
+	conn=0
+	addr=0
+	allconn=[]
+	def start(self):
+		sock=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+		sock.bind((self.host,self.port))
+		print("listening at ",sock.getsockname())
+		sock.listen(1)
+		try:
+			while True:
+				self.conn,self.addr=sock.accept()
+				t=threading.Thread(target=self.handle_client,args=(self.conn,self.addr))
+				t.start()
+				self.allconn.append(t)	
+		except socket.error:
+			print("coudnt connect with the socket")
+			SystemExit
+		
+		finally:
+			if sock:
+				sock.close()
+			for t in self.allconn:
+				t.join()
+	def handle_client(self,conn,addr):
+		data=conn.recv(1024)
+		response=self.handle_request(data)
+		conn.sendall(response)
+		conn.close()
+		
+	def handle_request(self,data):
+		return data
+	
+class HttpServer(TcpServer):
+	
+	cntlngth=''
+	headers={
+		'Content-Type':'text/html ',
+		'Server':'First server ',
+		'Date'  :date.today(),
+		'Content-length':''
+		}
+	status_codes={
+			200:'Ok \n',
+			404:'Not found \n',
+			501:'Not implemented \n'
+		}
+	def __init__(self):
+		self.uri=None
+		self.method=None
+		self.logger=logging.getLogger()
+		self.logger.setLevel(logging.INFO)
+		self.evnt_logger=logging.FileHandler("access.log",mode='w')
+		self.evnt_logger.setFormatter(logging.Formatter('%(asctime)s  %(message)s'))
+		
+		
+	def handle_request(self,data):
+		blank_line = b'\r\n'
+		res = self.parse(data)
+		cntlngth=len(res)
+		dict2={'Content-length':cntlngth}
+		self.headers.update(dict2)
+		if  res==b'':
+			head=self.get_headers(self.headers).encode()
+			stscds=self.get_codes(404)
+			body=b'<h1>Error 404 Page not found</h1>'
+			return b"".join([stscds,head,blank_line,body])
+
+		elif res==b'Not operatable':
+			head=self.get_headers(self.headers).encode()
+			stscds=self.get_codes(501)
+			body=b'<h1>Error 501 Not Implemented</h1>'
+			return b"".join([stscds,head,blank_line,body])
+
+		elif res==b'Deleted':
+			head=self.get_headers(self.headers).encode()
+			stscds=self.get_codes(200)
+			body=b'<h1>File Deleted</h1>'
+			return b"".join([stscds,head,blank_line,body])
+
+        
+		elif res==b'return head':
+			head=self.get_headers(self.headers)
+			stscds=self.get_codes(200)
+			return b"".join([stscds,head.encode(),blank_line])
+		
+		elif res==b'Form post done':
+			dict3={'Content-Type':'multipart/form-data'}
+			self.headers.update(dict3)
+			head=self.get_headers(self.headers).encode()
+			stscds=self.get_codes(200)
+			body=b'<h1>Happy hacking</h1>'
+			return b"".join([stscds,head,blank_line,body])
+
+            
+		else:
+			self.logger.addHandler(self.evnt_logger)
+			self.logger.info("Connected to"+" "+f"{self.addr}"+"and page "+" "+f"{self.uri}"+"requested")
+			head=self.get_headers(self.headers)
+			stscds=self.get_codes(200)
+			return b"".join([stscds,head.encode(),blank_line,res])
+	
+		
+	def parse(self,data):
+		lines=data.split(b"\r\n")
+		reqline=lines[0]
+		self.method=reqline.decode().split(' ')[0]
+		if self.method!='GET' and self.method!='DELETE' and self.method!='POST'  and self.method!='HEAD':
+			return b'Not operatable'
+		elif self.method=='DELETE':
+			self.handle_DELETE(reqline)
+			return b'Deleted'
+		elif self.method=='HEAD':
+			return b'return head'
+		elif self.method=='POST':
+			self.handle_POST(reqline)
+			return b'Form post done'
+	
+		response=self.handle_GET(reqline)
+		return response
+		
+	    
+    
+
+	def handle_DELETE(self,reqline):
+		body=b''
+		start=reqline.decode().find('/')+1
+		end=reqline.decode().find(' ',start)
+		self.uri=reqline[start:end]
+		if os.path.exists(self.uri):
+			os.remove(self.uri)
+							
+	def handle_GET(self,reqline):
+		body=b''
+		start=reqline.decode().find('/')+1
+		end=reqline.decode().find(' ',start)
+		self.uri=reqline[start:end]
+		if os.path.exists(self.uri) and not os.path.isdir(self.uri):
+			with open(self.uri,'rb')as r:
+                
+				body=r.read()
+		return body
+
+	def get_headers(self,headers):
+		header_lines = [f'{key}: {value}' for key, value in headers.items()]
+		return '\r\n'.join(header_lines)+'\r\n\r\n'
+	
+	
+	def get_codes(self,code):
+		msg=self.status_codes[code]
+		msgresponse='HTTP/1.1 %s %s \r \n'%(code,msg)
+		return msgresponse.encode()
+		
+if __name__ == '__main__':
+	server=HttpServer()
+	server.start()
+
+            </code></pre>
+            <p>And that's the end of this blog post</p> 
+        </div>
+
+        <h2 class="section-title">Conclusion</h2>
+        <div class="section-content">
+            
+            <p>Thanks and see you next time!</p>
+        </div>
+    </div>
+</body>
+</html>
