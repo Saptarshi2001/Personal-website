@@ -121,27 +121,32 @@
         <h2 class="section-title">Creating the HTTP Server</h2>
         <div class="section-content">
             <p>Now before we create the HTTP server, let us see what a typical request looks like:</p>
-            <pre><code>GET /
-Host: 
-Connection:
-User-Agent:</code></pre>
+            <pre><code>
+	GET /index.html HTTP/1.1
+	Host: example.com
+	Connection: keep-alive
+	User-Agent: Mozilla/5.0
+			</code></pre>
 
 		
 </code></pre>
             <p>The request part i.e., the first line is made up of a:</p>
             <ul>
-                <li><strong>Method</strong> - This tells the server what to do.</li>
-                <li><strong>URI</strong> - This stands for the resource that is being asked.</li>
-                <li><strong>HTTP version</strong> - This tells us the HTTP version the client supports.</li>
+              <li><strong>   Method</strong> : This tells the server what to do.<br></li>
+              <li><strong>  URI</strong> : This stands for the resource that is being asked.<br></li>
+              <li><strong> HTTP version</strong> : This tells us the HTTP version the client supports.<br></li>
             </ul>
+			<p>The rest of it are headers(then a blank line and a body which we havent put over here so you will not be able to see it)</p>
             <p>Now, what our class <code>HTTPServer</code> is doing is being a subclass of TCP server which ultimately also allows us to override the <code>handle_client</code> method. Before that, let's look at the response of an HTTP server:</p>
-            <pre><code>HTTP / 1.1 200 OK
-Server:
-Date:
-Content-Type:
-Content-Length:
-
-hello world</code></pre>
+            <pre><code>
+	HTTP/1.1 200 OK            # The first line is called the response line 
+	Server: Tornado/4.3        # Response header
+	Date: Wed, 18 Oct 2017     # Response header
+	Content-type: text/html    # Response header
+	Content-Length: 13         # Response header
+                           				   # Blank line
+	Hello, world!  			   # Body
+			</code></pre>
             <p>The response goes like this:</p>
             <ul>
                 <li>The response line</li>
@@ -185,19 +190,19 @@ hello world</code></pre>
 		if  res==b'':
 			head=self.get_headers(self.headers).encode()
 			stscds=self.get_codes(404)
-			body=b'<h1>Error 404 Page not found</h1>'
+			body = b'&lt;h1&gt;Error 404 Page not found&lt;/h1&gt;'
 			return b"".join([stscds,head,blank_line,body])
 
 		elif res==b'Not operatable':
 			head=self.get_headers(self.headers).encode()
 			stscds=self.get_codes(501)
-			body=b'<h1>Error 501 Not Implemented</h1>'
+			body=b'&lt;h1&gt;Error 501 Not Implemented&lt;/h1&gt;'
 			return b"".join([stscds,head,blank_line,body])
 
 		elif res==b'Deleted':
 			head=self.get_headers(self.headers).encode()
 			stscds=self.get_codes(200)
-			body=b'<h1>File Deleted</h1>'
+			body=b'&lt;/h1&gt;'File Deleted&lt;/h1&gt;'
 			return b"".join([stscds,head,blank_line,body])
 
         
@@ -206,13 +211,7 @@ hello world</code></pre>
 			stscds=self.get_codes(200)
 			return b"".join([stscds,head.encode(),blank_line])
 		
-		elif res==b'Form post done':
-			dict3={'Content-Type':'multipart/form-data'}
-			self.headers.update(dict3)
-			head=self.get_headers(self.headers).encode()
-			stscds=self.get_codes(200)
-			body=b'<h1>Happy hacking</h1>'
-			return b"".join([stscds,head,blank_line,body])
+		
 
             
 		else:
@@ -235,19 +234,19 @@ hello world</code></pre>
 			return b'Deleted'
 		elif self.method=='HEAD':
 			return b'return head'
-		elif self.method=='POST':
-			self.handle_POST(reqline)
-			return b'Form post done'
+		
 	
 		response=self.handle_GET(reqline)
 		return response
 
             </code></pre>
             <p>In the parse section, we split the data by pulling a delimiter of '\r\n'. '\r' means carriage return and '\n' means newline, the split data is basically:</p>
-            <pre><code>GET index.html HTTP
-" " "
-" " "
-" " "</code></pre>
+            <pre><code>
+[GET /index.html HTTP/1.1],
+[Host: example.com],
+[Connection: keep-alive],
+[User-Agent: Mozilla/5.0]
+</code></pre>
 
             <p>From here we only use the first line.</p>
             <p>Now if we have a request other than GET or DELETE or POST or HEAD, then it means that function can't be executed. So we return 'Not operatable'. We go back once again to the <code>handle_request</code> function.</p>
@@ -320,10 +319,39 @@ hello world</code></pre>
           </code></pre>  
             
         </div>
+
+		<h2 class="section-title">Understanding the logger</h2>
+        <div class="section-content">
+            <pre><code>
+		def __init__(self):
+		self.uri=None
+		self.method=None
+		self.logger=logging.getLogger()
+		self.logger.setLevel(logging.INFO)
+		self.evnt_logger=logging.FileHandler("access.log",mode='w')
+		self.evnt_logger.setFormatter(logging.Formatter('%(asctime)s  %(message)s'))
+		</code></pre>
+
+		<p>We have already seen this piece of code before,but now its time to understand it.
+			What the logger does is create a log file when you fire up the server.
+		</p>
+		<pre><code>
+		self.logger.addHandler(self.evnt_logger)
+		self.logger.info("Connected to"+" "+f"{self.addr}"+"and page "+" "+f"{self.uri}"+"requested")
+		head=self.get_headers(self.headers)
+		stscds=self.get_codes(200)
+		return b"".join([stscds,head.encode(),blank_line,res])
+		</code></pre>
+		<p> What it does is every time you access a page it writes the url , address with the date and time of its creation into the 
+			access log file.This acts as a log file that helps show the history of all the pages accessed by your server.
+		</p>
+
+
+
         <h2 class="section-title">Putting it all together</h2>
         <div class="section-content">
             <pre><code>
-                import socket
+import socket
 import threading
 import os
 import signal
@@ -399,19 +427,19 @@ class HttpServer(TcpServer):
 		if  res==b'':
 			head=self.get_headers(self.headers).encode()
 			stscds=self.get_codes(404)
-			body=b'<h1>Error 404 Page not found</h1>'
+			body=b'&lt;/h1&gt;'Error 404 Page not found&lt;/h1&gt;'
 			return b"".join([stscds,head,blank_line,body])
 
 		elif res==b'Not operatable':
 			head=self.get_headers(self.headers).encode()
 			stscds=self.get_codes(501)
-			body=b'<h1>Error 501 Not Implemented</h1>'
+			body=b'&lt;/h1&gt;Error 501 Not Implemented&lt;/h1&gt;'
 			return b"".join([stscds,head,blank_line,body])
 
 		elif res==b'Deleted':
 			head=self.get_headers(self.headers).encode()
 			stscds=self.get_codes(200)
-			body=b'<h1>File Deleted</h1>'
+			body=b'&lt;/h1&gt;File Deleted&lt;/h1&gt;'
 			return b"".join([stscds,head,blank_line,body])
 
         
@@ -420,13 +448,7 @@ class HttpServer(TcpServer):
 			stscds=self.get_codes(200)
 			return b"".join([stscds,head.encode(),blank_line])
 		
-		elif res==b'Form post done':
-			dict3={'Content-Type':'multipart/form-data'}
-			self.headers.update(dict3)
-			head=self.get_headers(self.headers).encode()
-			stscds=self.get_codes(200)
-			body=b'<h1>Happy hacking</h1>'
-			return b"".join([stscds,head,blank_line,body])
+		
 
             
 		else:
