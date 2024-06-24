@@ -36,8 +36,10 @@
         }
 
         p {
-            margin: 10px 0;
+            margin: 20px 0;
             padding: 10px;
+			text-align:justify;
+			display: block;
         }
 
         .section-title {
@@ -61,16 +63,25 @@
             font-family: "Courier New", Courier, monospace;
             font-size: 16px;
         }
+		ul {
+            padding-left: 20px; /* Adjust the value as needed */
+            margin-left: 20px;  /* Adjust the value as needed */
+        }
+
+        li {
+            margin-bottom: 5px; /* Optional: Add some space between list items */
+        }
+		
     </style>
 </head>
 
 <body>
-    <h1 id="heading">Understanding HTTP</h1>
+    <h1 id="heading"><u>Understanding HTTP</u></h1>
 
     <div class="Http">
         <p>Hi!! In this post, we will discuss the intricacies of HTTP and how it works under the hood. In the end, we will build a basic implementation of an HTTP server. You can read more about the HTTP protocol in <a href="https://datatracker.ietf.org/doc/html/rfc9110">RFC 9110.</a></p>
         
-        <h2 class="section-title">The TCP</h2>
+        <h2 class="section-title"><u>The TCP</u></h2>
         <div class="section-content">
             <p>Before we build our HTTP server, we need to build a TCP server. After all, HTTP is built on top of TCP.</p>
             <pre><code>class TcpServer:
@@ -118,7 +129,7 @@
             </ul>
         </div>
 
-        <h2 class="section-title">Creating the HTTP Server</h2>
+        <h2 class="section-title"><u>Creating the HTTP Server</u></h2>
         <div class="section-content">
             <p>Now before we create the HTTP server, let us see what a typical request looks like:</p>
             <pre><code>
@@ -129,7 +140,7 @@
 			</code></pre>
 
 		
-</code></pre>
+
             <p>The request part i.e., the first line is made up of a:</p>
             <ul>
               <li><strong>   Method</strong> : This tells the server what to do.<br></li>
@@ -176,11 +187,12 @@
                     self.evnt_logger=logging.FileHandler("access.log",mode='w')
                     self.evnt_logger.setFormatter(logging.Formatter('%(asctime)s  %(message)s'))
             <p>That's why as you see above, we created the HTTP headers as well as the status codes. The 200 means that the operation was successful. The 404 means the resource was not found. The 505 means the particular operation can't be performed.</p>
-        </div>
+        </code></pre>
+		</div>
 
-        <h2 class="section-title">Handling Requests</h2>
+        <h2 class="section-title"><u>Handling Requests</u></h2>
         <div class="section-content">
-            <p>Now we come to the <code>handle_request</code> function. We use a <code>blank_line = b'\r\n'</code> for the body that we will use as a part of the message. Let's first parse the requests as shown in the parse function.</p>
+            <p>Now we come to the handle_request function. We use a blank_line = b'\r\n' for the body that we will use as a part of the message. Let's first parse the requests as shown in the parse function.</p>
           <pre><code> def handle_request(self,data):
 		blank_line = b'\r\n'
 		res = self.parse(data)
@@ -220,8 +232,8 @@
 			head=self.get_headers(self.headers)
 			stscds=self.get_codes(200)
 			return b"".join([stscds,head.encode(),blank_line,res])</code></pre>
-
-            <h4 class="section-title">Parsing the Requests</h4>
+		</div>
+            <h4 class="section-title"><u>Parsing the Requests</u></h4>
             <pre><code>
                 def parse(self,data):
 		lines=data.split(b"\r\n")
@@ -248,8 +260,8 @@
 [User-Agent: Mozilla/5.0]
 </code></pre>
 
-            <p>From here we only use the first line.</p>
-            <p>Now if we have a request other than GET or DELETE or POST or HEAD, then it means that function can't be executed. So we return 'Not operatable'. We go back once again to the <code>handle_request</code> function.</p>
+            <p>From here we only use the first line.Now if we have a request other than GET or DELETE or POST or HEAD, 
+			then it means that function can't be executed. So we return 'Not operatable'. We go back once again to the <code>handle_request</code> function.</p>
             <p>Now since we get <code>res</code> as not operatable, we make the body 'Error 501 Not implemented'. First up, we need to put all our headers into the variable <code>head</code>.</p>
             <pre><code>
                 def get_headers(self,headers):
@@ -269,7 +281,7 @@
         </code></pre>
         </div>
 
-        <h2 class="section-title">GET Operation</h2>
+        <h2 class="section-title"><u>GET Operation</u></h2>
         <div class="section-content">
             <p>For the GET operation, what we did was find out the requested page by finding its start and end. We put it inside <code>uri</code>. Now we see whether it exists in the system and if it does, then we read that body and send it to <code>res</code> in the form of bytes.</p>
         <pre><code>
@@ -286,7 +298,7 @@
         </code></pre>
         </div>
 
-        <h2 class="section-title">DELETE Operation</h2>
+        <h2 class="section-title"><u>DELETE Operation</u></h2>
         <div class="section-content">
             <p>For the DELETE operation, we do the same thing except that we remove the resource.</p>
         <pre><code>
@@ -301,14 +313,10 @@
         </code></pre>
         </div>
 
-        <h2 class="section-title">HEAD Method</h2>
+        <h2 class="section-title"><u>HEAD Method</u></h2>
         <div class="section-content">
             <p>For the HEAD method, since there's no body to be read, we didn't create any function. Instead, we packaged headers, status, and blank line into bytes and sent them to be sent to the <code>handle_request</code> function.</p>
-            Head method:-
-            -------------
-            For the head method,since there's no body to be read,we didnt created any
-            function. Instead we packaged headers,status and blank line into bytes and
-            sent them to be sent to the handle_request function.
+            
 
           <pre><code>
             elif res==b'return head':
@@ -320,7 +328,7 @@
             
         </div>
 
-		<h2 class="section-title">Understanding the logger</h2>
+		<h2 class="section-title"><u>Understanding the logger</u></h2>
         <div class="section-content">
             <pre><code>
 		def __init__(self):
@@ -348,7 +356,7 @@
 
 
 
-        <h2 class="section-title">Putting it all together</h2>
+        <h2 class="section-title"><u>Putting it all together</u></h2>
         <div class="section-content">
             <pre><code>
 import socket
@@ -514,10 +522,10 @@ if __name__ == '__main__':
 	server.start()
 
             </code></pre>
-            <p>And that's the end of this blog post</p> 
+            <p>And that's the end of this blog post.Here's the source <a href="https://github.com/Saptarshi2001/PyHttp">code</a> and the <a href="https://github.com/Saptarshi2001/PyHttp"> roadmap</a>.</p> 
         </div>
 
-        <h2 class="section-title">Conclusion</h2>
+        <h2 class="section-title"><u>Conclusion</u></h2>
         <div class="section-content">
             
             <p>Thanks and see you next time!</p>
