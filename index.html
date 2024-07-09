@@ -3,104 +3,146 @@
 <head>
     <title>Saptarshi Dutta's blog</title>
     <style>
-        *
-        {
-           margin: 0;
-           padding: 0;
-        }
-       
-
-        h1
-        {
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+    
+    body {
+        background-color: rgb(229, 243, 229);
+        background-size: contain;
+        font-family: sans-serif;
+        line-height: 1.6;
+        padding: 20px;
+    }
+    
+    h1 {
         color: rgb(21, 18, 18);
         font: 30px/1.5 verdana;
-        margin: 10;
-        padding:10px;
-        }
-        h4
-        {
-        color: rgb(26, 22, 22);
-        font: 20px/1.5 verdana bold;
-        margin: 10;
-        padding:10px;
-        }
-        
-        .projects h2
-        {
-        color: rgb(26, 22, 22);
-        font: 25px/1.5 verdana;
-        margin: 10;
-        padding:10px;
-        }
-        .project-item {
-            display: flex;
-            align-items: center;
-            margin: 10px 0;
-        }
-
-        .project-item h4 {
-            margin-right: 15px;
-            font: 20px/1.5 verdana;
-            width: 120px;
-        }
-        .project-item h4 a {
-            color: blue;
-            text-decoration: underline;
-        }
-        .project-item p {
-            font: 20px/1.5 sans-serif;
-        }
-        .Blogs h2
-        {
-        color: rgb(26, 22, 22);
-        font: 25px/1.5 verdana;
-        margin: 10;
-        padding:10px;
-        }
-        
-        .blogs ul li h4 a
-        {
-        color:rgb(26, 22, 22);
-        font: 20px/1.5 sans-serif;
-        margin: 10;
-        padding: 10px;
-        line-height: 50px;
+        margin-bottom: 20px;
         text-decoration: underline;
-        
-        }
-        
-        
-        footer
-        {
+    }
+    
+    h4 {
         color: rgb(26, 22, 22);
-        font: 25px/1.5 sans-serif;
-        margin: 10;
-        padding-left:10px;
+        font: 15px/1.5 verdana;
+        margin-bottom: 20px;
         
-        }
-       .foot ul li a
-       {
-        display: block;
-        color:blue;
+    }
+    
+    .projects h2, .Blogs h2, footer {
+        color: rgb(26, 22, 22);
+        font: 25px/1.5 verdana;
+        margin: 30px 0 20px;
+        text-decoration: underline;
+    }
+    
+    .project-item {
+        margin-bottom: 20px;
+    }
+    
+    .project-item h4 {
+        margin-bottom: 5px;
+    }
+    
+    .project-item h4 a {
+        color: blue;
+        text-decoration: underline;
+        font: 20px/1.5 verdana;
+    }
+    
+    .project-item p {
+        font: 16px/1.5 sans-serif;
+        margin-left: 10px;
+    }
+    
+    
+    
+    
+    
+    .foot ul {
+        list-style-type: none;
+    }
+    
+    .foot ul li {
+        margin-bottom: 10px;
+    }
+    
+    .foot ul li a {
+        color: blue;
         font: 18px/1.5 sans-serif;
-        padding-left:10px;
-        line-height: 40px;
         text-decoration: underline;
-       }
-       
-       body
-       {
-        background-color: rgb(229, 243, 229);
-        background-size:contain;
-       }
-        </style>
+    }
+    
+    @media (max-width: 768px) {
+        h1 {
+            font-size: 24px;
+        }
+    
+        h4 {
+            font-size: 14px;
+        }
+    
+        .project-item h4 a {
+            font-size: 18px;
+        }
+    
+        .project-item p {
+            font-size: 14px;
+        }
+        .Blogs h2 {
+    color: rgb(26, 22, 22);
+    font: 28px/1.5 verdana;  /* Slightly increased from 25px to 28px */
+    margin: 30px 0 20px;
+}
+
+.Blogs ul {
+    list-style-type: none;
+}
+
+.Blogs ul li {
+    margin-bottom: 15px;  /* Increased from 10px to 15px for more spacing between items */
+}
+
+.Blogs ul li h4 a {
+    color: blue;
+    font: 25px/1.5 sans-serif;  /* Increased from 20px to 22px */
+    text-decoration: underline;
+}
+
+.Blogs ul li h4 a:hover {
+    color: darkblue;
+}
+
+/* For mobile responsiveness */
+@media (max-width: 768px) {
+    .Blogs h2 {
+        font-size: 24px;  /* Adjusted for mobile */
+    }
+
+    .Blogs ul li h4 a {
+        font-size: 18px;  /* Adjusted for mobile */
+    }
+}
+        
+        .foot ul li a {
+            color: blue;
+            font-size: 16px;
+            
+        }
+    }
+    </style>
 </head>
 
 <body id="background">
 <h1 id="heading">Saptarshi Dutta's blog</h1>
 
-<h4> I am a programmer who loves reinventing the wheel.Currently residing in Kolkata,India.I am well versed with C,java,python. I can also build with 
-    databases such as sql and mongodb.I am  on the lookout for a job,so if there's an opening, hit me up at <a href="saptarshidutta2001@gmail.com">saptarshidutta2001@gmail.com</a>
+<h4> Hi, i am Saptarshi Dutta ,currently residing in Kolkata,India.I am a programmer who loves reinventing the wheel.
+    As of now,i have built a shell,a grep tool,a http server,an editor and a dns parser.I am 
+    capable of writing in C,Java and Python,but i dont have a problem in adapting to new tech stacks.I am currently on the lookout 
+    for new oppurtunities,so feel free to reach out to me at
+     <a href="saptarshidutta2001@gmail.com">saptarshidutta2001@gmail.com</a> if you have an opening for a software engineer.
 </h4>
 
 <div class="projects">
@@ -122,6 +164,10 @@
         <h4><a href="https://github.com/Saptarshi2001/PyHttp">PyHttp</a>-</h4>
         <p>An Http server built from scratch in python</p>
     </li>
+    <li class="project-item">
+        <h4><a href="https://github.com/Saptarshi2001/PyDns-parser">PyDns-parser</a>-</h4>
+        <p>A dns parser built in python to parse dns queries in hexadecimal,binary and decimal formats</p>
+    </li>
 
 </ul>
 </div>
@@ -130,6 +176,7 @@
     <ul>
         <li><h4><a href="Blogs/blog1.html">Building a shell from scratch</a></h4></li>
         <li><h4><a href="Blogs/blog2.html">Building a http server from scratch</a></h4></li>
+        <li><h4><a href="Blogs/blog3.html">Books i loved during these 4 years in undergrad</a></h4></li>
         
     </ul>
 </div>
@@ -141,7 +188,7 @@
 <ul>    
 <li><a href="https://github.com/Saptarshi2001"> Github</href></li>
 <li><a href="https://www.linkedin.com/in/saptarshi-dutta-6579641b9/">Linkedin</href></li>
-<li><a href="https://mail.google.com/mail/u/0/#inbox">Email</href></li>
+<li><a href="saptarshidutta2001@gmail.com">Email</href></li>
 
 </ul>
 </div>
