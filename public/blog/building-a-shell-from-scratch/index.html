@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto" data-theme="auto">
+
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="noindex, nofollow">
+<title>Building a Shell from Scratch | Saptarshi Dutta</title>
+<meta name="keywords" content="">
+<meta name="description" content="Hello and welcome readers!! So this is the first post on my blog. And to kick things off, let&rsquo;s see how we can build a basic implementation of a shell. If you have ever wondered how a shell actually works, you can get to know it here.
+Reading the Lines
+First, we declare a buffer size (let&rsquo;s say 1024; it can be anything really but just big enough to hold the input), a variable called line that points to the array, a variable called position that indicates the current index, and an integer variable c.">
+<meta name="author" content="">
+<link rel="canonical" href="//localhost:1313/blog/building-a-shell-from-scratch/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.89ca4972ab5e6aaa05e9a0dae0c4bb64b26585bc79e36f5cf33614eea0283abe.css" integrity="sha256-icpJcqteaqoF6aDa4MS7ZLJlhbx5429c8zYU7qAoOr4=" rel="preload stylesheet" as="style">
+<link rel="icon" href="//localhost:1313/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="//localhost:1313/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="//localhost:1313/favicon-32x32.png">
+<link rel="apple-touch-icon" href="//localhost:1313/apple-touch-icon.png">
+<link rel="mask-icon" href="//localhost:1313/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="//localhost:1313/blog/building-a-shell-from-scratch/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+                color-scheme: dark;
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .toc {
+                background: var(--entry);
+            }
+        }
+
+    </style>
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else if (localStorage.getItem("pref-theme") === "light") {
+       document.querySelector("html").dataset.theme = 'light';
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else {
+        document.querySelector("html").dataset.theme = 'light';
+    }
+
+</script>
+</head>
+<body id="top">
+    <header class="header">
+    <nav class="header-nav">
+        <div class="logo">
+            <a href="//localhost:1313/" accesskey="h" title="Saptarshi Dutta (Alt + H)">Saptarshi Dutta</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" class="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg class="moon" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg class="sun" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu" class="menu">
+            <li>
+                <a href="//localhost:1313/blog/" title="Blog">
+                    <span>Blog</span>
+                </a>
+            </li>
+            <li>
+                <a href="//localhost:1313/projects/" title="Projects">
+                    <span>Projects</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    
+    <h1 class="post-title entry-hint-parent">
+      Building a Shell from Scratch
+    </h1>
+    <div class="post-meta">
+
+<span>6 min</span>
+
+</div>
+  </header> 
+  <div class="post-content md-content"><p>Hello and welcome readers!! So this is the first post on my blog. And to kick things off, let&rsquo;s see how we can build a basic implementation of a shell. If you have ever wondered how a shell actually works, you can get to know it here.</p>
+<h2 id="reading-the-lines">Reading the Lines<a hidden class="anchor" aria-hidden="true" href="#reading-the-lines">#</a></h2>
+<p>First, we declare a buffer size (let&rsquo;s say 1024; it can be anything really but just big enough to hold the input), a variable called <code>line</code> that points to the array, a variable called <code>position</code> that indicates the current index, and an integer variable <code>c</code>.</p>
+<p>We then use <code>malloc</code> to dynamically allocate the array. We dynamically allocate it since we can&rsquo;t predefine a definite number of characters from the start.</p>
+<p>Next, we enter a loop and input characters through <code>c = getchar()</code>. If it&rsquo;s EOF or &lsquo;\n&rsquo;, we end the loop, put <code>line[position]</code> in the array, end the loop, and return the pointer to the array. Otherwise, we store that character in the array and increase the position by 1. If the size of the array exceeds <code>buffsize</code>, we use <code>realloc</code> to reallocate the array.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">readline</span>()
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> status;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>line;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> buff_size <span style="color:#f92672">=</span> LSH_RL_BUFSIZE;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> position <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> c;
+</span></span><span style="display:flex;"><span>    line <span style="color:#f92672">=</span> (<span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>)<span style="color:#a6e22e">malloc</span>(buff_size <span style="color:#f92672">*</span> <span style="color:#66d9ef">sizeof</span>(<span style="color:#66d9ef">char</span>));
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span>line)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">printf</span>(<span style="color:#e6db74">&#34;No space allocated&#34;</span>);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> NULL;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">while</span>(<span style="color:#ae81ff">1</span>)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        c<span style="color:#f92672">=</span><span style="color:#a6e22e">getchar</span>();
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span>(c<span style="color:#f92672">==</span><span style="color:#e6db74">&#39;\n&#39;</span><span style="color:#f92672">||</span>c<span style="color:#f92672">==</span>EOF)
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>            line[position]<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;\0&#39;</span>;
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">break</span>;
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span>(position<span style="color:#f92672">&gt;=</span>buff_size)
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>            buff_size<span style="color:#f92672">+=</span>LSH_RL_BUFSIZE;
+</span></span><span style="display:flex;"><span>            line<span style="color:#f92672">=</span><span style="color:#a6e22e">realloc</span>(line,<span style="color:#66d9ef">sizeof</span>(<span style="color:#66d9ef">char</span>)<span style="color:#f92672">*</span>buff_size);
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span>(<span style="color:#f92672">!</span>line)
+</span></span><span style="display:flex;"><span>            {
+</span></span><span style="display:flex;"><span>                <span style="color:#a6e22e">printf</span>(<span style="color:#e6db74">&#34;%s&#34;</span>,<span style="color:#e6db74">&#34;Reallocation unsuccesful&#34;</span>);
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">else</span>
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>            line[position]<span style="color:#f92672">=</span>c;
+</span></span><span style="display:flex;"><span>            position<span style="color:#f92672">++</span>;
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    line[position]<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;\0&#39;</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> line;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h2 id="splitting-the-line">Splitting the Line<a hidden class="anchor" aria-hidden="true" href="#splitting-the-line">#</a></h2>
+<p>After reading the line, we pass the pointer to a function <code>splitline</code>. Here we declare a variable <code>buff_size</code> to be 64. We declare <code>ptrtokens</code> and <code>token</code> as a pointer and another as the pointer to pointer variable. Next, we dynamically allocate the <code>tokens</code> variable as an array where each element will be a variable.</p>
+<p>We then go through a loop where using the <code>strtok</code> function, we split the line array using delimiters, get the pointer that points to these split lines, and put it in the array of pointers. We increment <code>pos</code> by 1 and continue until <code>token != NULL</code>. We then return the pointer that points to the array of pointers, i.e., <code>tokens</code>.</p>
+<p>Before executing it, we create an array of built-ins for the commands that will be executed. We also create a function that stores the addresses of the functions of the commands we execute.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">char</span> <span style="color:#f92672">**</span><span style="color:#a6e22e">splitline</span>(<span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>line)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> buff_size <span style="color:#f92672">=</span> LSH_TOK_BUFSIZE;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">char</span> <span style="color:#f92672">**</span>tokens;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>token;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> pos <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>    tokens <span style="color:#f92672">=</span> <span style="color:#a6e22e">malloc</span>(<span style="color:#66d9ef">sizeof</span>(line) <span style="color:#f92672">*</span> buff_size);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span>tokens)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">fprintf</span>(stderr, <span style="color:#e6db74">&#34;Allocation unsuccesfull&#34;</span>);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> NULL;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    token <span style="color:#f92672">=</span> <span style="color:#a6e22e">strtok</span>(line, LSH_TOK_DELIM);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">while</span> (token <span style="color:#f92672">!=</span> NULL)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        tokens[pos] <span style="color:#f92672">=</span> token;
+</span></span><span style="display:flex;"><span>        pos<span style="color:#f92672">++</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (pos <span style="color:#f92672">&gt;=</span> buff_size)
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>            buff_size <span style="color:#f92672">+=</span> LSH_TOK_BUFSIZE;
+</span></span><span style="display:flex;"><span>            tokens <span style="color:#f92672">=</span> <span style="color:#a6e22e">realloc</span>(tokens, buff_size <span style="color:#f92672">*</span> <span style="color:#66d9ef">sizeof</span>(<span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>));
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span>tokens)
+</span></span><span style="display:flex;"><span>            {
+</span></span><span style="display:flex;"><span>                <span style="color:#a6e22e">fprintf</span>(stderr, <span style="color:#e6db74">&#34;Reallocation unsuccesfull&#34;</span>);
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">return</span> NULL;
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        token <span style="color:#f92672">=</span> <span style="color:#a6e22e">strtok</span>(NULL, LSH_TOK_DELIM);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    tokens[pos] <span style="color:#f92672">=</span> NULL;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> tokens;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h2 id="executing-the-commands">Executing the Commands<a hidden class="anchor" aria-hidden="true" href="#executing-the-commands">#</a></h2>
+<p>Now that we have the tokens, we pass them to <code>sh_execute</code>. Here, we check if the first token is one of the built-in commands. If it is, we call the corresponding function. Otherwise, we call <code>sh_launch</code> which uses <code>execvp</code> to execute the command.</p>
+<h2 id="changing-directory">Changing Directory<a hidden class="anchor" aria-hidden="true" href="#changing-directory">#</a></h2>
+<p>The <code>cd</code> command is implemented as <code>sh_cd</code>. If no argument is given, it prints the current directory. If the argument is <code>..</code>, it moves up one directory. Otherwise, it uses <code>chdir</code> to change to the specified directory.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">sh_cd</span>(<span style="color:#66d9ef">char</span> <span style="color:#f92672">**</span>args)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">char</span><span style="color:#f92672">*</span> store;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">strcmp</span>(args[<span style="color:#ae81ff">0</span>],<span style="color:#e6db74">&#34;cd&#34;</span>)<span style="color:#f92672">==</span><span style="color:#ae81ff">0</span> <span style="color:#f92672">&amp;&amp;</span> args[<span style="color:#ae81ff">1</span>]<span style="color:#f92672">==</span>NULL)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        store<span style="color:#f92672">=</span><span style="color:#a6e22e">_getcwd</span>(store,<span style="color:#66d9ef">sizeof</span>(MAX_PATH));
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">printf</span>(<span style="color:#e6db74">&#34;%s &#34;</span>,store);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span>(<span style="color:#a6e22e">strcmp</span>(args[<span style="color:#ae81ff">1</span>],<span style="color:#e6db74">&#34;..&#34;</span>)<span style="color:#f92672">==</span><span style="color:#ae81ff">0</span>)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">chdir</span>(<span style="color:#e6db74">&#34;..&#34;</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">else</span>
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">chdir</span>(args[<span style="color:#ae81ff">1</span>])<span style="color:#f92672">!=</span><span style="color:#ae81ff">0</span>)
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">fprintf</span>(stderr, <span style="color:#e6db74">&#34;Oops&#34;</span>);
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">printf</span>(<span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>);
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    store<span style="color:#f92672">=</span><span style="color:#a6e22e">_getcwd</span>(store,<span style="color:#66d9ef">sizeof</span>(MAX_PATH));
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">printf</span>(<span style="color:#e6db74">&#34;%s &#34;</span>,store);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h2 id="making-a-directory">Making a Directory<a hidden class="anchor" aria-hidden="true" href="#making-a-directory">#</a></h2>
+<p>Next up, we go to <code>sh_mkdir</code>. This function helps us to create a directory. If there are no arguments, it gives an error. If the directory already exists or the path is not found, it throws an error. Otherwise, it uses the <code>CreateDirectory</code> function, which takes the argument and <code>NULL</code> to create the directory.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">sh_mkdir</span>(<span style="color:#66d9ef">char</span> <span style="color:#f92672">**</span>args)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> result;
+</span></span><span style="display:flex;"><span>    result<span style="color:#f92672">=</span><span style="color:#a6e22e">CreateDirectory</span>(args[<span style="color:#ae81ff">1</span>],NULL);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span>(args[<span style="color:#ae81ff">1</span>]<span style="color:#f92672">==</span>NULL)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">fprintf</span>(stderr,<span style="color:#e6db74">&#34;No directory created </span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span>(result<span style="color:#f92672">==</span><span style="color:#ae81ff">0</span>)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span>(errno<span style="color:#f92672">==</span>ERROR_ALREADY_EXISTS)
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">fprintf</span>(stderr,<span style="color:#e6db74">&#34;Directory already present </span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>);
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span>(errno<span style="color:#f92672">==</span>ERROR_PATH_NOT_FOUND)
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">fprintf</span>(stderr,<span style="color:#e6db74">&#34;Path not found </span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>);
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">printf</span>(<span style="color:#e6db74">&#34;Directory created </span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">char</span><span style="color:#f92672">*</span> store;
+</span></span><span style="display:flex;"><span>    store<span style="color:#f92672">=</span><span style="color:#a6e22e">_getcwd</span>(store,<span style="color:#66d9ef">sizeof</span>(MAX_PATH));
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">printf</span>(<span style="color:#e6db74">&#34;%s &#34;</span>,store);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h2 id="help-cls-and-exit">Help, CLS, and Exit<a hidden class="anchor" aria-hidden="true" href="#help-cls-and-exit">#</a></h2>
+<p>For getting a list of all the commands, we iterate over all the built-ins and print them. For <code>exit</code> and <code>cls</code>, there&rsquo;s not much to explain.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">sh_help</span>()
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">printf</span>(<span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">printf</span>(<span style="color:#e6db74">&#34;HERE ARE THE COMMANDS </span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> j <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; j <span style="color:#f92672">&lt;</span> <span style="color:#a6e22e">size</span>(); j<span style="color:#f92672">++</span>)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">printf</span>(<span style="color:#e6db74">&#34;%s</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>, builtins[j]);
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">printf</span>(<span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">char</span><span style="color:#f92672">*</span> store;
+</span></span><span style="display:flex;"><span>    store<span style="color:#f92672">=</span><span style="color:#a6e22e">_getcwd</span>(store,<span style="color:#66d9ef">sizeof</span>(MAX_PATH));
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">printf</span>(<span style="color:#e6db74">&#34;%s &#34;</span>,store);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">sh_exit</span>()
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">sh_clear</span>()
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">system</span>(<span style="color:#e6db74">&#34;cls&#34;</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">char</span><span style="color:#f92672">*</span> store;
+</span></span><span style="display:flex;"><span>    store<span style="color:#f92672">=</span><span style="color:#a6e22e">_getcwd</span>(store,<span style="color:#66d9ef">sizeof</span>(MAX_PATH));
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">printf</span>(<span style="color:#e6db74">&#34;%s &#34;</span>,store);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h2 id="changing-the-color">Changing the Color<a hidden class="anchor" aria-hidden="true" href="#changing-the-color">#</a></h2>
+<p>This one is my favorite. We first print out the characters and numbers present. We then take one input for the background color and one for the foreground color. We join both of them with <code>snprintf</code> and use the <code>system</code> command. Let&rsquo;s say we use 1 as the background and E as the foreground, and we get the desired color scheme.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">sh_color</span>()
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">char</span> col;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">char</span> backcol;
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">printf</span>(<span style="color:#e6db74">&#34;Press any of the keys in the table for seting background and foreground color </span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">printf</span>(<span style="color:#e6db74">&#34;Here&#39;s the table </span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">printf</span>(<span style="color:#e6db74">&#34;Color id</span><span style="color:#ae81ff">\t</span><span style="color:#e6db74">Color</span><span style="color:#ae81ff">\t</span><span style="color:#e6db74">Color id</span><span style="color:#ae81ff">\t</span><span style="color:#e6db74">Color </span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">printf</span>( <span style="color:#e6db74">&#34;1</span><span style="color:#ae81ff">\t\t</span><span style="color:#e6db74">Aqua</span><span style="color:#ae81ff">\t</span><span style="color:#e6db74">A</span><span style="color:#ae81ff">\t\t</span><span style="color:#e6db74">Light  Green </span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">printf</span>( <span style="color:#e6db74">&#34;2</span><span style="color:#ae81ff">\t\t</span><span style="color:#e6db74">Green</span><span style="color:#ae81ff">\t</span><span style="color:#e6db74">0</span><span style="color:#ae81ff">\t\t</span><span style="color:#e6db74">Black </span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">printf</span>( <span style="color:#e6db74">&#34;3</span><span style="color:#ae81ff">\t\t</span><span style="color:#e6db74">Blue</span><span style="color:#ae81ff">\t</span><span style="color:#e6db74">9</span><span style="color:#ae81ff">\t\t</span><span style="color:#e6db74">Light  Blue </span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">printf</span>( <span style="color:#e6db74">&#34;4</span><span style="color:#ae81ff">\t\t</span><span style="color:#e6db74">Red</span><span style="color:#ae81ff">\t</span><span style="color:#e6db74">B</span><span style="color:#ae81ff">\t\t</span><span style="color:#e6db74">Light  Aqua </span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">printf</span>( <span style="color:#e6db74">&#34;5</span><span style="color:#ae81ff">\t\t</span><span style="color:#e6db74">Purple</span><span style="color:#ae81ff">\t</span><span style="color:#e6db74">C</span><span style="color:#ae81ff">\t\t</span><span style="color:#e6db74">Light  Red </span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">printf</span>( <span style="color:#e6db74">&#34;6</span><span style="color:#ae81ff">\t\t</span><span style="color:#e6db74">Yellow</span><span style="color:#ae81ff">\t</span><span style="color:#e6db74">D</span><span style="color:#ae81ff">\t\t</span><span style="color:#e6db74">Light  Purple </span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">printf</span>( <span style="color:#e6db74">&#34;7</span><span style="color:#ae81ff">\t\t</span><span style="color:#e6db74">White</span><span style="color:#ae81ff">\t</span><span style="color:#e6db74">E</span><span style="color:#ae81ff">\t\t</span><span style="color:#e6db74">Light  Yellow </span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">printf</span>( <span style="color:#e6db74">&#34;8</span><span style="color:#ae81ff">\t\t</span><span style="color:#e6db74">Gray</span><span style="color:#ae81ff">\t</span><span style="color:#e6db74">F</span><span style="color:#ae81ff">\t\t</span><span style="color:#e6db74">Bright White </span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">printf</span>(<span style="color:#e6db74">&#34;Enter the background color:- &#34;</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">scanf</span>(<span style="color:#e6db74">&#34; %c&#34;</span>,<span style="color:#f92672">&amp;</span>backcol);
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">printf</span>(<span style="color:#e6db74">&#34;Enter the foreground color:- &#34;</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">scanf</span>(<span style="color:#e6db74">&#34; %c&#34;</span>,<span style="color:#f92672">&amp;</span>col);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">char</span> command[<span style="color:#ae81ff">50</span>];
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">snprintf</span>(command,<span style="color:#66d9ef">sizeof</span>(command),<span style="color:#e6db74">&#34;Color %c%c&#34;</span>,backcol,col);
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">system</span>(command);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">char</span><span style="color:#f92672">*</span> store;
+</span></span><span style="display:flex;"><span>    store<span style="color:#f92672">=</span><span style="color:#a6e22e">_getcwd</span>(store,<span style="color:#66d9ef">sizeof</span>(MAX_PATH));
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">printf</span>(<span style="color:#e6db74">&#34;%s &#34;</span>,store);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h2 id="extracting-contents-from-a-file">Extracting Contents from a File<a hidden class="anchor" aria-hidden="true" href="#extracting-contents-from-a-file">#</a></h2>
+<p>Lastly, we see how the <code>cat</code> command can be used to extract contents from a file into the console. As of now, this command only works on text files, but I will add functionality for other types of files as well. If there&rsquo;s no <code>cat</code> in <code>args[0]</code> or no file given in <code>args[1]</code>, it&rsquo;s an error. Otherwise, we take <code>args[1]</code>, use the <code>fopen</code> function in C, and pass the file pointer to <code>fgets</code>. What <code>fgets</code> does in this loop is read the text line from the console, which we print out until it reaches <code>NULL</code>.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">sh_cat</span>(<span style="color:#66d9ef">char</span> <span style="color:#f92672">**</span>args)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>err<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;cat&#34;</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>contains<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;.txt&#34;</span>;
+</span></span><span style="display:flex;"><span>    FILE <span style="color:#f92672">*</span>ptr;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span>(<span style="color:#a6e22e">strcmp</span>(args[<span style="color:#ae81ff">0</span>],<span style="color:#e6db74">&#34;cat&#34;</span>)<span style="color:#f92672">!=</span><span style="color:#ae81ff">0</span>)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">printf</span>(<span style="color:#e6db74">&#34;%s&#34;</span>,<span style="color:#e6db74">&#34;oops not a cat command&#34;</span>);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">char</span> result[<span style="color:#66d9ef">sizeof</span>(args[<span style="color:#ae81ff">1</span>])];
+</span></span><span style="display:flex;"><span>    ptr<span style="color:#f92672">=</span><span style="color:#a6e22e">fopen</span>(args[<span style="color:#ae81ff">1</span>],<span style="color:#e6db74">&#34;r&#34;</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span>(ptr<span style="color:#f92672">==</span>NULL <span style="color:#f92672">&amp;&amp;</span> <span style="color:#a6e22e">strstr</span>(args[<span style="color:#ae81ff">1</span>],contains))
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        ptr<span style="color:#f92672">=</span><span style="color:#a6e22e">fopen</span>(args[<span style="color:#ae81ff">1</span>],<span style="color:#e6db74">&#34;w&#34;</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span>(ptr<span style="color:#f92672">==</span>NULL)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">printf</span>(<span style="color:#e6db74">&#34;%s&#34;</span>,<span style="color:#e6db74">&#34;Oops no file&#34;</span>);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">while</span> (<span style="color:#a6e22e">fgets</span>(result,<span style="color:#66d9ef">sizeof</span>(LSH_RL_BUFSIZE),ptr)<span style="color:#f92672">!=</span>NULL)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">printf</span>(<span style="color:#e6db74">&#34;%s&#34;</span>,result);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">fclose</span>(ptr);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>store;
+</span></span><span style="display:flex;"><span>    store<span style="color:#f92672">=</span><span style="color:#a6e22e">_getcwd</span>(store,<span style="color:#66d9ef">sizeof</span>(MAX_PATH));
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">printf</span>(<span style="color:#e6db74">&#34;%s&#34;</span>,store);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h2 id="now-reading-all-of-these">Now Reading All of These<a hidden class="anchor" aria-hidden="true" href="#now-reading-all-of-these">#</a></h2>
+<p>Now putting readline, splitline and execute into a single function we get:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">read_all</span>()
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>line;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">char</span> <span style="color:#f92672">**</span>split;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> status;
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">printf</span>(<span style="color:#e6db74">&#34;Welcome to the holy command line </span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">do</span>
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">printf</span>(<span style="color:#e6db74">&#34;&gt;&gt;&#34;</span>);
+</span></span><span style="display:flex;"><span>        line <span style="color:#f92672">=</span> <span style="color:#a6e22e">readline</span>();
+</span></span><span style="display:flex;"><span>        split <span style="color:#f92672">=</span> <span style="color:#a6e22e">splitline</span>(line);
+</span></span><span style="display:flex;"><span>        status<span style="color:#f92672">=</span> <span style="color:#a6e22e">sh_execute</span>(split);
+</span></span><span style="display:flex;"><span>    } <span style="color:#66d9ef">while</span> (status);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">free</span>(line);
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">free</span>(split);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h2 id="putting-it-all-together">Putting it all together<a hidden class="anchor" aria-hidden="true" href="#putting-it-all-together">#</a></h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#75715e">#define LSH_RL_BUFSIZE 1024
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#define LSH_TOK_BUFSIZE 64
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#define LSH_TOK_DELIM &#34; \t\r\n\a&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;windows.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;unistd.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;stdlib.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;stdio.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;string.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span><span style="color:#75715e">&lt;tchar.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span><span style="color:#75715e">&lt;conio.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span><span style="color:#75715e">&lt;unistd.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span><span style="color:#75715e">&lt;assert.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span><span style="color:#75715e">&lt;sys/stat.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span><span style="color:#75715e">&lt;direct.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span><span style="color:#75715e">&#34;shell.h&#34;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span><span style="color:#75715e">&#34;test.c&#34;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>builtins[] <span style="color:#f92672">=</span> {<span style="color:#e6db74">&#34;cd&#34;</span>,<span style="color:#e6db74">&#34;mkdir&#34;</span>,<span style="color:#e6db74">&#34;help&#34;</span>, <span style="color:#e6db74">&#34;exit&#34;</span>,<span style="color:#e6db74">&#34;echo&#34;</span>,<span style="color:#e6db74">&#34;cls&#34;</span>,<span style="color:#e6db74">&#34;color&#34;</span>,<span style="color:#e6db74">&#34;cat&#34;</span>};
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">int</span> (<span style="color:#f92672">*</span>builtins_fun[])(<span style="color:#66d9ef">char</span> <span style="color:#f92672">**</span>) <span style="color:#f92672">=</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&amp;</span>sh_cd,
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&amp;</span>sh_mkdir,
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&amp;</span>sh_help,
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&amp;</span>sh_exit,
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&amp;</span>sh_echo,
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&amp;</span>sh_clear,
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&amp;</span>sh_color,
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&amp;</span>sh_cat
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">size</span>()
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">sizeof</span>(builtins) <span style="color:#f92672">/</span> <span style="color:#66d9ef">sizeof</span>(<span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>);
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// ... (all the functions defined above)
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">main</span>()
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">read_all</span>();
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h2 id="conclusion">Conclusion<a hidden class="anchor" aria-hidden="true" href="#conclusion">#</a></h2>
+<p>And that&rsquo;s the end of the blog. Here&rsquo;s the source <a href="https://github.com/Saptarshi2001/Cshell">code</a>. You can check out the roadmap for this project over <a href="https://github.com/Saptarshi2001/Cshell?tab=readme-ov-file#roadmap">here</a>. Until then, goodbye!</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="//localhost:1313/">Saptarshi Dutta</a></span> · 
+
+    
+    
+    <span>
+        Powered by
+        <a href="https://gohugo.io/?utm_source=papermod" rel="noopener" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" id="top-link" class="top-link hidden" aria-label="go to top" title="Go to Top (Alt + G)" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevrons-up">
+        <polyline points="17 11 12 6 7 11"></polyline>
+        <polyline points="17 18 12 13 7 18"></polyline>
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu');
+    if (menu) {
+        
+        const scrollPosition = localStorage.getItem("menu-scroll-position");
+        if (scrollPosition) {
+            menu.scrollLeft = parseInt(scrollPosition, 10);
+        }
+        
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var toplink = document.getElementById("top-link");
+    window.onscroll = function () {
+        const scrollThreshold = window.innerHeight;
+        if (document.body.scrollTop > scrollThreshold || document.documentElement.scrollTop > scrollThreshold) {
+            toplink.classList.remove("hidden");
+        } else {
+            toplink.classList.add("hidden");
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        const html = document.querySelector("html");
+        if (html.dataset.theme === "dark") {
+            html.dataset.theme = 'light';
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            html.dataset.theme = 'dark';
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

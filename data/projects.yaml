@@ -1,0 +1,34 @@
+- name: Cshell
+  url: https://github.com/Saptarshi2001/Cshell
+  lang: C
+  description: A shell built in C with Unix utilities to recreate the unix experience
+
+- name: grp tool
+  url: https://github.com/Saptarshi2001/grp-tool
+  lang: C
+  description: A grep tool written in C for quick searching in text files
+
+- name: EditorZ
+  url: https://github.com/Saptarshi2001/EditorZ
+  lang: Java
+  description: A text editor written in Java
+
+- name: PyHttp
+  url: https://github.com/Saptarshi2001/PyHttp
+  lang: Python
+  description: An HTTP server built from scratch in python
+
+- name: PyDns-parser
+  url: https://github.com/Saptarshi2001/PyDns-parser
+  lang: Python
+  description: A DNS parser built in python to parse DNS queries in hexadecimal, binary and decimal formats
+
+- name: LocalSocial
+  url: https://github.com/Saptarshi2001/LocalSocial
+  lang: Python
+  description: An open source self hosted tool made with flask and sqlite to schedule your social media activities
+
+- name: Pyload
+  url: https://github.com/Saptarshi2001/Pyload
+  lang: Python
+  description: An Asynchronous HTTP Load Testing Tool with Database Storage and Betterstack Integration
