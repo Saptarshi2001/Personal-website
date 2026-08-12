@@ -1,34 +1,42 @@
+- name: AsyncLoad
+  url: https://github.com/Saptarshi2001/AsyncLoad
+  lang: Python
+  featured: true
+  description: An asynchronous load-testing CLI built to stress applications with heavy concurrent traffic.
+
+- name: JBroker
+  url: https://github.com/Saptarshi2001/JBroker
+  lang: Java
+  featured: true
+  description: A lightweight TCP message broker with publish-subscribe routing, topic management, and concurrent client handling.
+
+- name: Radsort
+  url: https://github.com/Saptarshi2001/Radsort
+  lang: TypeScript
+  featured: true
+  description: A radix sort library for fast, predictable integer sorting in TypeScript and JavaScript projects.
+
 - name: Cshell
   url: https://github.com/Saptarshi2001/Cshell
   lang: C
-  description: A shell built in C with Unix utilities to recreate the unix experience
-
-- name: grp tool
-  url: https://github.com/Saptarshi2001/grp-tool
-  lang: C
-  description: A grep tool written in C for quick searching in text files
-
-- name: EditorZ
-  url: https://github.com/Saptarshi2001/EditorZ
-  lang: Java
-  description: A text editor written in Java
+  description: A shell built in C with Unix-style utilities.
 
 - name: PyHttp
   url: https://github.com/Saptarshi2001/PyHttp
   lang: Python
-  description: An HTTP server built from scratch in python
+  description: An HTTP server built from scratch to explore TCP and HTTP internals.
 
 - name: PyDns-parser
   url: https://github.com/Saptarshi2001/PyDns-parser
   lang: Python
-  description: A DNS parser built in python to parse DNS queries in hexadecimal, binary and decimal formats
+  description: A DNS parser for inspecting queries in hexadecimal, binary, and decimal formats.
+
+- name: EditorZ
+  url: https://github.com/Saptarshi2001/EditorZ
+  lang: Java
+  description: A lightweight text editor designed for a fast workflow.
 
 - name: LocalSocial
   url: https://github.com/Saptarshi2001/LocalSocial
   lang: Python
-  description: An open source self hosted tool made with flask and sqlite to schedule your social media activities
-
-- name: Pyload
-  url: https://github.com/Saptarshi2001/Pyload
-  lang: Python
-  description: An Asynchronous HTTP Load Testing Tool with Database Storage and Betterstack Integration
+  description: A self-hosted Flask and SQLite tool for scheduling social media activity.

@@ -1,73 +1,58 @@
-# Saptarshi Dutta's Portfolio — Hugo Site
+# Saptarshi Dutta — Portfolio
 
-This is the Hugo-migrated version of the original static HTML portfolio.
+A Hugo portfolio for [Saptarshi Dutta](https://github.com/Saptarshi2001), built with the PaperMod theme. It highlights selected projects and long-form writing, and deploys to GitHub Pages through GitHub Actions.
 
-## Structure
+## Featured projects
 
-```
-hugo-site/
-├── hugo.toml                  # Site config (baseURL, params)
-├── archetypes/
-│   └── default.md             # Template for new posts
-├── content/
-│   ├── _index.md              # Homepage intro text
-│   └── blog/
-│       ├── building-a-shell-from-scratch.md
-│       ├── building-a-http-server-from-scratch.md
-│       └── books-i-loved-during-undergrad.md
-├── data/
-│   ├── projects.yaml          # Project list (edit to add/remove projects)
-│   └── books.yaml             # Book list (edit to add/remove books)
-├── layouts/
-│   ├── index.html             # Homepage template
-│   └── _default/
-│       ├── baseof.html        # Base HTML shell (shared by all pages)
-│       ├── single.html        # Blog post template
-│       ├── list.html          # Blog listing template
-│       └── books.html         # Books page template
-└── static/
-    └── css/
-        └── main.css           # All styles (retro theme)
-```
+- [AsyncLoad](https://github.com/Saptarshi2001/AsyncLoad)
+- [JBroker](https://github.com/Saptarshi2001/JBroker)
+- [Radsort](https://github.com/Saptarshi2001/Radsort)
 
-## Getting Started
+Project metadata lives in `data/projects.yaml`. Entries marked `featured: true` appear on both the homepage and at the top of the Projects page.
 
-### Prerequisites
-Install Hugo: https://gohugo.io/installation/
+## Run locally
 
-### Run locally
+Hugo Extended 0.146.0 or newer is required.
+
 ```bash
-cd hugo-site
-hugo server -D
+git clone --recurse-submodules https://github.com/Saptarshi2001/personal-website.git
+cd personal-website
+hugo server
 ```
-Then open http://localhost:1313
 
-### Build for production
+Open `http://localhost:1313`.
+
+If the repository is already cloned without its theme submodule, run:
+
 ```bash
-hugo --minify
+git submodule update --init --recursive
 ```
-Output goes to the `public/` directory — deploy that folder anywhere (Netlify, GitHub Pages, Cloudflare Pages, etc.).
 
-## Adding a New Blog Post
+## Add a blog post
+
 ```bash
-hugo new blog/my-new-post.md
-```
-Then edit `content/blog/my-new-post.md`.
-
-## Adding a Project
-Edit `data/projects.yaml` and add a new entry:
-```yaml
-- name: MyProject
-  url: https://github.com/Saptarshi2001/MyProject
-  lang: Go
-  description: What it does
+hugo new content blog/my-new-post.md
 ```
 
-## Deploying to GitHub Pages
-1. Push the repo to GitHub
-2. In repo Settings → Pages → Source: GitHub Actions
-3. Add `.github/workflows/hugo.yml` using the official Hugo workflow
+Each post should include a title, description, and tags in its front matter.
 
-## Customising
-- Site-wide settings (name, email, social links): `hugo.toml` → `[params]`
-- Colors and fonts: `static/css/main.css` → `:root` variables
+## Deploy to GitHub Pages
+
+The workflow at `.github/workflows/hugo.yml` builds and deploys every push to `main`.
+
+1. Push the repository to GitHub.
+2. Open **Settings → Pages** in the repository.
+3. Set **Source** to **GitHub Actions**.
+4. Push to `main`, or run the workflow manually from the **Actions** tab.
+
+The workflow checks out the PaperMod submodule, builds with Hugo Extended, uploads the generated `public/` directory, and deploys it to the `github-pages` environment.
+
+## Main files
+
+- `hugo.toml` — site metadata, navigation, and Hugo settings
+- `data/projects.yaml` — featured and additional projects
+- `content/blog/` — blog posts
+- `layouts/home.html` — portfolio homepage
+- `layouts/projects/list.html` — Projects page
+- `assets/css/extended/portfolio.css` — portfolio styles
+- `.github/workflows/hugo.yml` — GitHub Pages deployment

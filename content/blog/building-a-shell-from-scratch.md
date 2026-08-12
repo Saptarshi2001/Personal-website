@@ -1,6 +1,10 @@
 ---
 title: "Building a Shell from Scratch"
 subtitle: "Systems Programming"
+description: "A practical walkthrough of reading input, tokenizing commands, executing processes, and implementing built-ins in a small C shell."
+summary: "A practical walkthrough of reading input, tokenizing commands, executing processes, and implementing built-ins in a small C shell."
+tags: ["C", "systems programming", "shells"]
+weight: 1
 ---
 
 Hello and welcome readers!! So this is the first post on my blog. And to kick things off, let's see how we can build a basic implementation of a shell. If you have ever wondered how a shell actually works, you can get to know it here.

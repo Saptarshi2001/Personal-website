@@ -1,6 +1,10 @@
 ---
 title: "Building a HTTP Server from Scratch"
 subtitle: "Understanding HTTP Under the Hood"
+description: "Build a small HTTP server on top of TCP in Python and explore request parsing, methods, status codes, headers, and logging."
+summary: "Build a small HTTP server on top of TCP in Python and explore request parsing, methods, status codes, headers, and logging."
+tags: ["Python", "HTTP", "networking"]
+weight: 2
 ---
 
 Hi!! In this post, we will discuss the intricacies of HTTP and how it works under the hood. In the end, we will build a basic implementation of an HTTP server. You can read more about the HTTP protocol in [RFC 9110](https://datatracker.ietf.org/doc/html/rfc9110).

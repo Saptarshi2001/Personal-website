@@ -1,0 +1,61 @@
+{{ define "main" }}
+<section class="portfolio-hero">
+  <p class="eyebrow">Software engineer · Kolkata, India</p>
+  <h1>I build backend systems and developer tools from first principles.</h1>
+  <p class="hero-copy">I’m Saptarshi Dutta. My work sits around messaging, networking, databases, concurrency, and the infrastructure that makes software dependable.</p>
+  <div class="hero-actions">
+    <a class="button button-primary" href="{{ "projects/" | relURL }}">Explore my work <span aria-hidden="true">→</span></a>
+    <a class="button button-secondary" href="mailto:saptarshidutta2001@gmail.com">Get in touch</a>
+  </div>
+  <div class="hero-links" aria-label="Social links">
+    <a href="https://github.com/Saptarshi2001" target="_blank" rel="noreferrer">GitHub</a>
+    <a href="https://www.linkedin.com/in/saptarshi-dutta-6579641b9/" target="_blank" rel="noreferrer">LinkedIn</a>
+    <a href="mailto:saptarshidutta2001@gmail.com">Email</a>
+  </div>
+</section>
+
+<section class="portfolio-section" aria-labelledby="featured-projects">
+  <div class="section-heading">
+    <div>
+      <p class="eyebrow">Selected work</p>
+      <h2 id="featured-projects">Featured projects</h2>
+    </div>
+    <a class="text-link" href="{{ "projects/" | relURL }}">All projects <span aria-hidden="true">→</span></a>
+  </div>
+  <div class="project-grid">
+    {{ range where hugo.Data.projects "featured" true }}
+    <article class="project-card">
+      <div class="project-card-top">
+        <span class="language-pill">{{ .lang }}</span>
+        <span class="project-arrow" aria-hidden="true">↗</span>
+      </div>
+      <h3><a href="{{ .url }}" target="_blank" rel="noreferrer">{{ .name }}</a></h3>
+      <p>{{ .description }}</p>
+      <a class="card-link" href="{{ .url }}" target="_blank" rel="noreferrer" aria-label="View {{ .name }} on GitHub"></a>
+    </article>
+    {{ end }}
+  </div>
+</section>
+
+<section class="portfolio-section" aria-labelledby="latest-writing">
+  <div class="section-heading">
+    <div>
+      <p class="eyebrow">Notes from the workbench</p>
+      <h2 id="latest-writing">Writing</h2>
+    </div>
+    <a class="text-link" href="{{ "blog/" | relURL }}">All posts <span aria-hidden="true">→</span></a>
+  </div>
+  <div class="writing-list">
+    {{ range first 3 (where site.RegularPages "Section" "blog") }}
+    <article class="writing-item">
+      <div>
+        <p class="writing-meta">{{ with .Params.subtitle }}{{ . }} · {{ end }}{{ .ReadingTime }} min read</p>
+        <h3><a href="{{ .RelPermalink }}">{{ .Title }}</a></h3>
+        <p>{{ .Description | default (.Summary | plainify | truncate 150) }}</p>
+      </div>
+      <span class="writing-arrow" aria-hidden="true">→</span>
+    </article>
+    {{ end }}
+  </div>
+</section>
+{{ end }}

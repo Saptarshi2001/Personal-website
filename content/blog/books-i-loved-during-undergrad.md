@@ -1,5 +1,9 @@
 ---
 title: "Books I Loved During These 4 Years in Undergrad"
+description: "Eleven books—fiction, science fiction, memoir, and computer history—that stayed with me through undergrad."
+summary: "Eleven books—fiction, science fiction, memoir, and computer history—that stayed with me through undergrad."
+tags: ["books", "reading"]
+weight: 3
 ---
 
 **On the Road** — Possibly a book that has the biggest impact on me. Possibly puts a mirror in front of you of what it means to be alive and free.

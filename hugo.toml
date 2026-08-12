@@ -1,19 +1,23 @@
-bbaseURL = "https://saptarshidutta.dev/"
-languageCode = "en-us"
+baseURL = "https://saptarshi2001.github.io/personal-website/"
+locale = "en-US"
 title = "Saptarshi Dutta"
 theme = "PaperMod"
+enableRobotsTXT = true
+
+[pagination]
+  pagerSize = 10
 
 [params]
-  name = "Saptarshi Dutta"
-  subtitle = "Software Engineer | Problem Solver"
-  email = "saptarshidutta2001@gmail.com"
-  description = "Engineer from Kolkata. Into compilers, databases, network protocols."
+  env = "production"
+  author = "Saptarshi Dutta"
+  description = "Saptarshi Dutta is a software engineer in Kolkata building developer tools, networked systems, and backend infrastructure."
+  keywords = ["Saptarshi Dutta", "software engineer", "backend", "systems programming", "Java", "Python", "TypeScript"]
+  defaultTheme = "auto"
   ShowReadingTime = true
   ShowCodeCopyButtons = true
-
-  [params.homeInfoParams]
-    Title = "Hi, I'm Saptarshi 👋"
-    Content = "Engineer from Kolkata. I build things from scratch — shells, HTTP servers, DNS parsers. Currently looking for a software engineering role. Reach me at saptarshidutta2001@gmail.com"
+  ShowPostNavLinks = true
+  ShowBreadCrumbs = true
+  mainSections = ["blog"]
 
   [[params.socialIcons]]
     name = "github"
@@ -29,11 +33,24 @@ theme = "PaperMod"
 
 [menu]
   [[menu.main]]
-    name = "Blog"
-    url = "/blog/"
-    weight = 1
+    name = "Projects"
+    pageRef = "/projects"
+    weight = 10
 
   [[menu.main]]
-    name = "Projects"
-    url = "/projects/"
-    weight = 2
+    name = "Blog"
+    pageRef = "/blog"
+    weight = 20
+
+  [[menu.main]]
+    name = "GitHub"
+    url = "https://github.com/Saptarshi2001"
+    weight = 30
+
+[markup]
+  [markup.highlight]
+    noClasses = false
+
+[caches]
+  [caches.images]
+    dir = ":cacheDir/images"
